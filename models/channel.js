@@ -7,7 +7,7 @@ module.exports = function(sequelize, DataType)
             type: DataType.STRING,
             allowNull: false
         },
-        users_id:
+        users:
         {
             type: DataType.ARRAY(DataType.INTEGER),
             allowNull: true
