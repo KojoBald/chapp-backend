@@ -1,6 +1,6 @@
 module.exports = function(sequelize, DataType)
 {                             
-    return sequelize.define('user',
+    const User = sequelize.define('user',
     {
         username:
         {
@@ -39,4 +39,5 @@ module.exports = function(sequelize, DataType)
             allowNull: true
         }
     })
+    return User;
 }
