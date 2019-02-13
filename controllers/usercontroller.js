@@ -1,4 +1,4 @@
-const express = require('expresss');
+const express = require('express');
 const user = express.Router();
 
 /*  /user  */
@@ -48,3 +48,5 @@ userMessage.delete('/:id', (req, res) => {
 userMessage.get('/all/:id', (req, res) => {
     res.send('you got all messages between you and another user')
 })
+
+module.exports = user;
