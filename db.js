@@ -6,12 +6,10 @@ const sequelize = new Sequelize(process.env.DATABASE_NAME, 'postgres', process.e
 })
  
 sequelize.authenticate().then(
-    function()
-    {
+    function() {
         console.log('connected')
     },
-    function(err)
-    {
+    function(err) {
         console.log(err)
     }
 )

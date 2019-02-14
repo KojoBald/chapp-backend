@@ -33,7 +33,7 @@ module.exports = function(sequelize, DataType)
             type: DataType.STRING,
             allowNull: false
         },
-        channel:
+        channels:
         {
             type: DataType.ARRAY(DataType.INTEGER),
             allowNull: true
