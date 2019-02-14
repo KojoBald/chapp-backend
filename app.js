@@ -2,15 +2,12 @@ require('dotenv').config();
 
 var express = require('express');
 var app = express();
-var bodyParser = require('body-parser');
 var db = require('./db');
-
-app.use(bodyParser.json());
 
 db.sync();
 
-app.use(bodyParser.json());
-
+app.use(require('body-parser').json());
+app.use(require('./middleware/headers'));
 app.use('/user', require('./controllers/usercontroller'));
 app.use('/channel', require('./controllers/channelcontroller'));
 

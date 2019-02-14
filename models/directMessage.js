@@ -1,9 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const DirectMessage = sequelize.define('directmessage', {
-        username: {
-            type: DataTypes.INTEGER
-        },
-        channel: {
+        from: {
             type: DataTypes.INTEGER
         },
         to: {
