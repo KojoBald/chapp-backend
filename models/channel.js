@@ -10,7 +10,7 @@ module.exports = function(sequelize, DataType)
         users:
         {
             type: DataType.ARRAY(DataType.INTEGER),
-            allowNull: true
+            allowNull: false
         },
         admin_id:
         {

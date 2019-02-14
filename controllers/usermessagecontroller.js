@@ -11,6 +11,7 @@ const DirectMessageModel = db.import('../models/directMessage');
 UserMessageController.use(validateSession);
 
 UserMessageController.post('/', sendDirectMessage);
+
 UserMessageController.put('/:id', _withMessageFromId, _messageBelongsToUser, updateDirectMessage);
 UserMessageController.delete('/:id', _withMessageFromId, _messageBelongsToUser, deleteDirectMessage);
 

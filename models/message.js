@@ -1,7 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const Message = sequelize.define('message', {
-        username: {
+        user: {
             type: DataTypes.INTEGER,
+            allowNull: false
         },
         channel: {
             type: DataTypes.INTEGER,

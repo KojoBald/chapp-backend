@@ -1,132 +1,102 @@
-const channel = require('express').Router()
-const Channel = require('../db').import('../models/channel')
+const ChannelController = require('express').Router()
+const ChannelModel = require('../db').import('../models/channel')
 const validateSession = require('../middleware/validateSession')
 
+ChannelController.post('/', validateSession, createChannel)
 
-/******* CHANNELS *******/
+ChannelController.get('/:id', _withChannelFromId, getChannel)
+ChannelController.put('/:id', validateSession, _withChannelFromId, _isChannelAdmin, updateChannel)
+ChannelController.delete('/:id', validateSession, _withChannelFromId, _isChannelAdmin, deleteChannel)
 
-//create new channel
-channel.post('/channel', validateSession, (req, res) => {
-    if(!req.error) {
-        const channelFromRequest = {
-            name: req.body.name,
-            users: req.body.users,
-            admin_id: req.body.admin_id,
-        }
+ChannelController.get('/:id/users', _withChannelFromId, getChannelUsers)
 
-        Channel.create(channelFromRequest)
-            .then(channel => res.status(200).json(channel))
-            .catch(err => res.status(500).json({error: err}))
+ChannelController.put('/:id/invite', validateSession, _withChannelFromId, _isChannelAdmin, inviteUserToChannel)
+
+ChannelController.use('/message', require('./channelmessagecontroller'));
+
+function createChannel(req, res) {
+    const channelFromRequest = {
+        name: req.body.name,
+        users: [ req.authorizedUser.id ],
+        admin_id: req.authorizedUser.id,
     }
-    else {
-        res.status(500).json(req.errors)
-    }
-})
 
-//get info for specific channel
-channel.get('/channel/:id', (req, res) => {
-    Channel.findOne({ where: { name: req.params.name }})
-    .then(channel => res.status(200).json(channel))
-    .catch(err => res.status(500).json({ error: err}))
-})
-
-//update a channel
-channel.put('/channel/:id', (req, res) => {
-    if (!req.errors) {
-        Channel.update(req.body.channel, { where: { id: req.params.id }})
-          .then(channel => res.status(200).json(channel))
-          .catch(err => res.status(500).json(req.errors))
-      } else {
-          res.status(500).json(req.errors)
-        }
-})
-
-//delete channel
-channel.delete('/channel/:id', (req, res) => {
-    if(!req.errors) {
-        Channel.destroy({ where: {id:  
-            req.params.id }})
-            .then(channel => res.status(200).json(channel))
-            .catch(err => res.status(500).json({error: err}))
-    }
+    ChannelModel.create(channelFromRequest)
+        .then(channel => res.status(200).json(channel))
+        .catch(err => res.status(500).json({error: err}))
     
-    else {
-        res.status(500).json(req.errors)
+}
+
+function getChannel(req, res) {
+    res.status(200).json(req.channel);
+}
+
+function updateChannel(req, res) {
+    req.channel.name = req.body.name;
+    ChannelModel.update({
+        name: req.body.name
+    }, { 
+        where: { id: req.params.id },
+        fields: ['name']
+    }).then(channel => {
+        res.status(200).json({
+            channel: req.channel,
+            feedback: 'channel updated'
+        })
+    }).catch(err => {
+        res.status(500).json({ error: err.message })
+    })
+}
+
+function deleteChannel(req, res) {
+    ChannelModel.destroy({ 
+        where: { id: req.channel.id }
+    }).then(() => { 
+        res.status(200).json({ feedback: 'channel deleted' })
+    }).catch(err => {
+        res.status(500).json({ error: err.message }) 
+    })
+}
+
+function getChannelUsers(req, res) {
+    res.status(200).json(req.channel.users);
+}
+
+function inviteUserToChannel(req, res) { //TODO: add channel to user's channels array
+    req.channel.users.push(req.body.user)
+    ChannelModel.update({
+        users: req.channel.users
+    }, { 
+        where: { id: req.params.id },
+        fields: ['users']
+    }).then(channel => {
+        res.status(200).json({
+            channel: req.channel,
+            feedback: 'channel updated'
+        })
+    }).catch(err => {
+        res.status(500).json({ error: err.message})
+    })
     }
-})
 
-//get all users in a channel
-channel.get('/channel/:id/users', (req, res) => {
-    Channel.findAll()
-        .then(channel => res.status(200).json(channel))
-        .catch(err => res.status(500).json({ error: err}))
-})
+function _withChannelFromId(req, res, next) {
+    ChannelModel.findOne({
+        where: { id: req.params.id }
+    }).then(channel => {
+        if(!channel) return res.status(404).json({ error: `channel with id ${req.params.id} does not exist`})
 
-//invite user to channel
-channel.put('/channel/:id/invite', (req, res) => {
-if (!req.errors) {
-    Channel.update(req.body.channel, { where: { id: req.params.id }})
-        .then(channel => res.status(200).json(channel))
-        .catch(err => res.status(500).json(req.errors))
+        req.channel = channel;
+        next();
+    }).catch(err => {
+        res.status(500).json({ error: err.message })
+    })
+}
+
+function _isChannelAdmin(req, res, next) {
+    if(req.authorizedUser.id === req.channel.admin_id) {
+        next();
     } else {
-        res.status(500).json(req.errors)
+        res.status(403).json({ error: 'You are not the admin of that channel' })
     }
-})
-
-
-
-/***** USERS ******/
-const message = require('express').Router()
-
-
-//send message to channel
-message.post('/channel/message', validateSession, (req, res) => {
-    if(!req.error) {
-        const messageFromRequest = {
-            username: req.body.username,
-            channel: req.body.channel,
-            message: req.body.message,
-        }
-
-        Channel.create(messageFromRequest)
-            .then(channel => res.status(200).json(channel))
-            .catch(err => res.status(500).json({error: err}))
-    }
-    else {
-        res.status(500).json(req.errors)
-    }
-})
-
-//get all messages from a channel
-message.get('/channel/message/all/:id', (req, res) => {
-    Channel.findAll()
-        .then(channel => res.status(200).json(channel))
-        .catch(err => res.status(500).json({ error: err}))
-})
-
-//edit message in a channel
-message.put('/channel/message/:id', (req, res) => {
-    if (!req.errors) {
-        Channel.update(req.body.channel, { where: { id: req.params.id }})
-          .then(channel => res.status(200).json(channel))
-          .catch(err => res.status(500).json(req.errors))
-      } else {
-          res.status(500).json(req.errors)
-        }
-})
-
-//delete message in a channel
-message.delete('/channel/message/:id', (req, res) => {
-    if(!req.errors) {
-        Channel.destroy({ where: {id:  
-            req.params.id }})
-            .then(channel => res.status(200).json(channel))
-            .catch(err => res.status(500).json({error: err}))
-    }
-    
-    else {
-        res.status(500).json(req.errors)
-    }
-})
-
-module.exports = channel;
+}
+module.exports = ChannelController;
