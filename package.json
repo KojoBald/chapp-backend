@@ -1,0 +1,31 @@
+{
+  "name": "chapp-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "DATABASE_URL=\"postgres://yufcuznhhzozvt:cdc0f257750baf6f9051442b4bcdcc82c5e0df62dc5f1a5de062fb8eaba04aec@ec2-23-21-165-188.compute-1.amazonaws.com:5432/d75cb9adg4nnj8\" nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://KojoBald@github.com/KojoBald/chapp-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KojoBald/chapp-backend/issues"
+  },
+  "homepage": "https://github.com/KojoBald/chapp-backend#readme",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.4.0",
+    "nodemon": "^1.18.10",
+    "pg": "^7.8.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.42.0",
+    "sequelize-heroku": "^2.0.0"
+  }
+}
