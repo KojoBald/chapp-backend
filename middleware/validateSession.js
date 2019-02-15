@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
 var db = require('../db');
-var User = db.import('../models/users');
+var User = db.import('../models/User');
 
 module.exports = (req, res, next) => {
     var sessionToken = req.headers.authorization;

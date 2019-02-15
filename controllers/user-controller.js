@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 
 const UserController = express.Router();
-const UserModel = require('../db').import('../models/users')
+const UserModel = require('../db').import('../models/User')
 
 UserController.post('/', createNewUser)
 
@@ -15,7 +15,7 @@ UserController.get('/:id', _withUserFromId, getUser)
 UserController.get('/:id/channels', _withUserFromId, getUserChannels)
 
 
-UserController.use('/message', require('./usermessagecontroller'))
+UserController.use('/message', require('./user-message-controller'))
 
 function createNewUser(req, res) {
     UserModel.create({

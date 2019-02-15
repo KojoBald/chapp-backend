@@ -1,43 +1,35 @@
-module.exports = function(sequelize, DataType)
-{                             
-    const User = sequelize.define('user',
-    {
-        username:
-        {
+module.exports = function(sequelize, DataType){                              
+    const User = sequelize.define('user', {
+        username: {
             type: DataType.STRING,
             allowNull: false,
             unique: true
         },
-        password_hash:
-        {
+        password_hash: {
             type: DataType.STRING,
             allowNull: false
         },
-        email:
-        {
+        email: {
             type: DataType.STRING,
             allowNull: false
         },
-        image:
-        {
+        image: {
             type: DataType.STRING,
             allowNull: true
         },
-        first:
-        {
+        first: {
             type: DataType.STRING,
             allowNull: false
         },
-        last:
-        {
+        last: {
             type: DataType.STRING,
             allowNull: false
         },
-        channels:
-        {
+        channels: {
             type: DataType.ARRAY(DataType.INTEGER),
             allowNull: true
         }
     })
+
     return User;
 }

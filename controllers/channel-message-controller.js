@@ -2,8 +2,8 @@ const db = require('../db');
 const validateSession = require('../middleware/validateSession');
 
 const ChannelMessageController = require('express').Router();
-const ChannelModel = db.import('../models/channel');
-const ChannelMessageModel = db.import('../models/message');
+const ChannelModel = db.import('../models/Channel');
+const ChannelMessageModel = db.import('../models/ChannelMessage');
 
 ChannelMessageController.use(validateSession);
 

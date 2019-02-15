@@ -1,5 +1,5 @@
 const ChannelController = require('express').Router()
-const ChannelModel = require('../db').import('../models/channel')
+const ChannelModel = require('../db').import('../models/Channel')
 const validateSession = require('../middleware/validateSession')
 
 ChannelController.post('/', validateSession, createChannel)
@@ -12,7 +12,7 @@ ChannelController.get('/:id/users', _withChannelFromId, getChannelUsers)
 
 ChannelController.put('/:id/invite', validateSession, _withChannelFromId, _isChannelAdmin, inviteUserToChannel)
 
-ChannelController.use('/message', require('./channelmessagecontroller'));
+ChannelController.use('/message', require('./channel-message-controller'));
 
 function createChannel(req, res) {
     const channelFromRequest = {

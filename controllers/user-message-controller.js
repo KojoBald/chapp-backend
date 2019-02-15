@@ -5,8 +5,8 @@ const validateSession = require('../middleware/validateSession');
 const db = require('../db');
 
 const UserMessageController = express.Router();
-const UserModel = db.import('../models/users')
-const DirectMessageModel = db.import('../models/directMessage');
+const UserModel = db.import('../models/User')
+const DirectMessageModel = db.import('../models/DirectMessage');
 
 UserMessageController.use(validateSession);
 
