@@ -11,6 +11,4 @@ app.use(require('./middleware/headers'));
 app.use('/user', require('./controllers/user-controller'));
 app.use('/channel', require('./controllers/channel-controller'));
 
-app.listen(process.env.PORT, function() {
-    console.log(`app is listening on ${process.env.PORT}`)
-});
+app.listen(process.env.PORT || 8080, () => console.log(`app is listening on port ${process.env.PORT || 8080}`));
