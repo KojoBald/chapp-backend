@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "DATABASE_URL=\"postgres://yufcuznhhzozvt:cdc0f257750baf6f9051442b4bcdcc82c5e0df62dc5f1a5de062fb8eaba04aec@ec2-23-21-165-188.compute-1.amazonaws.com:5432/d75cb9adg4nnj8\" nodemon app.js"
+    "dev": "DATABASE_URL=\"postgres://yufcuznhhzozvt:cdc0f257750baf6f9051442b4bcdcc82c5e0df62dc5f1a5de062fb8eaba04aec@ec2-23-21-165-188.compute-1.amazonaws.com:5432/d75cb9adg4nnj8\" nodemon app.js",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
