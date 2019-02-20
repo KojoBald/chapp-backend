@@ -8,6 +8,7 @@ db.sync();
 
 app.use(require('body-parser').json());
 app.use(require('./middleware/headers'));
+
 app.use('/user', require('./controllers/user-controller'));
 app.use('/channel', require('./controllers/channel-controller'));
 

@@ -1,16 +1,28 @@
-const sequelize = require('sequelize-heroku').connect(require('sequelize'));
+const Sequelize = require('sequelize');
+let db = _parseDatabaseUri();
 
-if(sequelize) {
-    sequelize.authenticate()
-        .then(() => {
-            let config = sequelize.connectionManager.config;
-            console.log(`sequelize-heroku: connected to ${config.host} as ${config.username}`)
-        }).catch(error => {
-            let config = sequelize.connectionManager.config;
-            console.error(`sequelize-heroku: error connecting to ${config.host} as ${config.user}\nError: ${error.message}`)
-        })
-} else {
-    console.error('no connection environment variable found');
-}
+const sequelize = new Sequelize(db.name, db.user, db.password, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    host: db.host,
+    port: db.port,
+    // dialectOptions: { ssl: true },
+    logging: false
+});
+
+sequelize.authenticate()
+    .then(() => console.log(`connected to ${db.name} at ${db.host} on port ${db.port} as ${db.user}`))  
+    .catch(err => console.error(err))
 
 module.exports = sequelize;
+
+function _parseDatabaseUri() {
+    let match = process.env.DATABASE_URL.match(/postgres:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+    return {
+        user: match[1],
+        password: match[2],
+        host: match[3],
+        port: match[4],
+        name: match[5]
+    }
+}
