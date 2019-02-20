@@ -36,7 +36,11 @@ function sendDirectMessage(req, res) {
             feedback: 'message sent'
         })
     }).catch(error => {
-        res.status(500).json({ error: error.message })
+        console.error(error)
+        res.status(500).json({ 
+            error: error.message,
+            feedback: 'there was an issue sending your message'
+        })
     })
 }
 
@@ -53,7 +57,11 @@ function updateDirectMessage(req, res) {
             feedback: 'message updated'
         })
     }).catch(error => {
-        res.status(500).json({ error: error.message });
+        console.error(error)
+        res.status(500).json({ 
+            error: error.message, 
+            feedback: 'there was an issue editing your message'
+        });
     })
 }
 
@@ -63,9 +71,10 @@ function deleteDirectMessage(req, res) {
     }).then(() => {
         res.status(200).json({ feedback: 'message deleted' })
     }).catch(error => {
+        console.error(error)
         res.status(500).json({
             error: error.message,
-            feedback: 'there was an error deleting your message'
+            feedback: 'there was an issue deleting your message'
         })
     })
 }
@@ -86,6 +95,7 @@ function getAllDirectMessages(req, res) {
     }).then(messages => {
         res.status(200).json(messages);
     }).catch(error => {
+        console.error(error)
         res.status(500).json({
             error: error.message,
             feedback: 'there was an error getting these messages'
@@ -102,7 +112,11 @@ function _withMessageFromId(req, res, next) {
         req.message = message;
         next();
     }).catch(error => {
-        res.status(500).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ 
+            error: error.message,
+            feedback: 'there was an issue finding that message'
+        });
     })
 }
 

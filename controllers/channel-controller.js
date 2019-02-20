@@ -23,7 +23,13 @@ function createChannel(req, res) {
 
     ChannelModel.create(channelFromRequest)
         .then(channel => res.status(200).json(channel))
-        .catch(err => res.status(500).json({error: err}))
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({
+                error: err,
+                feedback: 'there was an issue creating channel'
+            })
+        })
     
 }
 
@@ -44,7 +50,11 @@ function updateChannel(req, res) {
             feedback: 'channel updated'
         })
     }).catch(err => {
-        res.status(500).json({ error: err.message })
+        console.error(err)
+        res.status(500).json({ 
+            error: err.message, 
+            feedback: 'there was an issue updating channel'
+        })
     })
 }
 
@@ -54,7 +64,11 @@ function deleteChannel(req, res) {
     }).then(() => { 
         res.status(200).json({ feedback: 'channel deleted' })
     }).catch(err => {
-        res.status(500).json({ error: err.message }) 
+        console.error(err)
+        res.status(500).json({ 
+            error: err.message,
+            feedback: 'there was an issue deleting channel'
+        }) 
     })
 }
 
@@ -75,7 +89,11 @@ function inviteUserToChannel(req, res) { //TODO: add channel to user's channels 
             feedback: 'channel updated'
         })
     }).catch(err => {
-        res.status(500).json({ error: err.message})
+        console.error(err)
+        res.status(500).json({ 
+            error: err.message,
+            feedback: 'there was an issue inviting the user to channel'
+        })
     })
     }
 
@@ -88,7 +106,11 @@ function _withChannelFromId(req, res, next) {
         req.channel = channel;
         next();
     }).catch(err => {
-        res.status(500).json({ error: err.message })
+        console.error(err);
+        res.status(500).json({ 
+            error: err.message,
+            feedback: 'there was an issue finding that channel'
+        })
     })
 }
 

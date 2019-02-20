@@ -26,6 +26,7 @@ function sendChannelMessage(req, res) {
             feedback: 'channel created'
         })
     }).catch(err => {
+        console.error(err)
         res.status(500).json({
             error: err,
             feedback: 'There was an error creating the channel'
@@ -41,6 +42,7 @@ function getChannelMessages(req, res) {
         }).then(messages => {
             res.status(200).json(messages)
         }).catch(err => {
+            console.error(err)
             res.status(500).json({ 
                 error: err.message,
                 feedback: 'There was an error getting the messages'
@@ -65,6 +67,7 @@ function updateChannelMessage(req, res) {
             feedback: 'message updated'
         })
     }).catch(err => {
+        console.error(err)
         res.status(500).json({
             error: err.message,
             feedback: 'there was an error updating your message'
@@ -78,6 +81,7 @@ function deleteChannelMessage(req, res) {
     }).then(() => {
         res.status(200).json({ feedback: 'message deleted' })
     }).catch(err => {
+        console.error(err)
         res.status(500).json({
             error: err.message,
             feedback: 'There was an error deleting your message'
@@ -94,7 +98,11 @@ function _withMessageFromId(req, res, next) {
         req.message = message;
         next();
     }).catch(err => {
-        res.status(500).json({ error: err.message })
+        console.error(err)
+        res.status(500).json({ 
+            error: err.message,
+            feedback: 'there was an issue finding that message'
+        })
     })
 }
 

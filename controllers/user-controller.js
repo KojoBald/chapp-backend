@@ -32,6 +32,7 @@ function createNewUser(req, res) {
             token: _createSessionTokenForUser(user.id)
         })
     }).catch(error => {
+        console.error(error)
         res.status(500).send(error.message)
     });
 }
@@ -52,7 +53,11 @@ function updateUser(req, res) { //TODO: make this require session token
                 feedback: 'user updated'
             })
     }).catch(error => {
-        res.status(400).send(error.message)
+        console.error(error)
+        res.status(400).json({
+            error: error.message,
+            feedback: 'there was an issue creating user'
+        })
     })
 }
 
@@ -62,6 +67,7 @@ function deleteUser(req, res) { //TODO: requires session token
     }).then(() => {
         res.status(200).json({ feedback: 'user deleted' })
     }).catch(error => {
+        console.error(error)
         res.status(500).json({ 
             error: error.message, 
             feedback: 'there was an issue deleting user'
@@ -100,7 +106,11 @@ function loginUser(req, res) {
             res.status(404).send('no user with that email');
         }
     }).catch(error => {
-        res.status(500).send(error.message);
+        console.error(error)
+        res.status(500).json({
+            error: error.message,
+            feedback: 'there was an issue logging in'
+        });
     })
 }
 
@@ -121,7 +131,11 @@ function _withUserFromId(req, res, next) {
         req.user = user;
         next();
     }).catch(error => {
-        res.status(500).json({ error: error.message });
+        console.error(error)
+        res.status(500).json({ 
+            error: error.message,
+            feedback: 'there was an issue getting user channels'
+        });
     })
 }
 
