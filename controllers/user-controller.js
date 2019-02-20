@@ -33,7 +33,10 @@ function createNewUser(req, res) {
         })
     }).catch(error => {
         console.error(error)
-        res.status(500).send(error.message)
+        res.status(500).json({
+            error: error, 
+            feedback: error.detail || 'there was an issue creating user'
+        })
     });
 }
 
