@@ -1,21 +1,27 @@
 const express = require('express');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
+const Op = require('sequelize').Op;
+
+const validateSession = require('../middleware/validateSession');
 
 const UserController = express.Router();
 const UserModel = require('../db').import('../models/User')
 
 UserController.post('/', createNewUser)
+UserController.get('/search', searchForUser)
 
 UserController.put('/login', loginUser );
 
-UserController.put('/:id', _withUserFromId, updateUser);
-UserController.delete('/:id', _withUserFromId, deleteUser);
-UserController.get('/:id', _withUserFromId, getUser)
-UserController.get('/:id/channels', _withUserFromId, getUserChannels)
+UserController.use('/:id', _withUserFromId);
+UserController.route('/:id')
+    .put(validateSession, _isSelf, updateUser)
+    .delete(validateSession, _isSelf, deleteUser)
+    .get(getUser)
 
+UserController.get('/:id/channels', getUserChannels)
 
-UserController.use('/message', require('./user-message-controller'))
+UserController.use('/:id/message', require('./user-message-controller'))
 
 function createNewUser(req, res) {
     UserModel.create({
@@ -35,6 +41,22 @@ function createNewUser(req, res) {
         console.error(error)
         res.status(500).send(error.message)
     });
+}
+
+function searchForUser(req, res) {
+    if(!req.query.q || req.query.q === '') return res.json([]);
+    UserModel.findAll({
+        where: {
+            [Op.or]: {
+                username: { [Op.iLike]: `%${req.query.q}%` },
+                first: { [Op.iLike]: `%${req.query.q}%` },
+                last: { [Op.iLike]: `%${req.query.q}%` }
+            }
+        },
+        attributes: ['id', 'username']
+    }).then(users => {
+        res.status(200).json(users);
+    })
 }
 
 function updateUser(req, res) { //TODO: make this require session token
@@ -139,6 +161,12 @@ function _withUserFromId(req, res, next) {
     })
 }
 
-
+function _isSelf(req, res, next) {
+    if(req.user.id === req.authorizedUser.id) {
+        next();
+    } else {
+        res.send(403).json({ error: 'you cannot change a user that is not you' });
+    }
+}
 
 module.exports = UserController;
