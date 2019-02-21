@@ -11,21 +11,22 @@ const DirectMessageModel = db.import('../models/DirectMessage');
 UserMessageController.use(validateSession);
 
 UserMessageController.post('/', sendDirectMessage);
+UserMessageController.get('/', getDirectMessagePartners)
 
 UserMessageController.put('/:id', _withMessageFromId, _messageBelongsToUser, updateDirectMessage);
 UserMessageController.delete('/:id', _withMessageFromId, _messageBelongsToUser, deleteDirectMessage);
 
-UserMessageController.get('/all/:userId', getAllDirectMessages);
+UserMessageController.get('/all', getAllDirectMessages);
 
 function sendDirectMessage(req, res) {
     UserModel.findOne({
-        where: { id: req.body.to }
+        where: { id: req.user.id }
     }).then(user => {
         if(user) {
             return DirectMessageModel.create({
                 from: req.authorizedUser.id,
-                to: req.body.to,
-                message: req.body.message
+                to: req.user.id,
+                text: req.body.text
             })
         } else {
             res.status(404).json({ error: 'the user you are messaging does not exist' })
@@ -41,6 +42,34 @@ function sendDirectMessage(req, res) {
             error: error.message,
             feedback: 'there was an issue sending your message'
         })
+    })
+}
+
+function getDirectMessagePartners(req, res) {
+    let ids = [];
+    DirectMessageModel.aggregate('from', 'DISTINCT', { 
+        plain: false,
+        where: { 
+            from: { [Op.not]: req.authorizedUser.id }
+        }
+    }).then(distincts => {
+        distincts.forEach(distinct => ids.push(distinct.DISTINCT));
+        return DirectMessageModel.aggregate('to', 'DISTINCT', {
+            plain: false,
+            where: {
+                to: { [Op.notIn]: ids }
+            }
+        })
+    }).then(distincts => {
+        distincts.forEach(distinct => ids.push(distinct.DISTINCT))
+        return UserModel.findAll({
+            where: {
+                id: { [Op.in]: ids }
+            },
+            attributes: ['username', 'id']
+        })
+    }).then(users => {
+        res.status(200).json(users);
     })
 }
 
@@ -80,14 +109,15 @@ function deleteDirectMessage(req, res) {
 }
 
 function getAllDirectMessages(req, res) {
+    console.log('getting messages between', req.authorizedUser.id, req.user.id);
     DirectMessageModel.findAll({
         where: { 
             [Op.and]: {
                 from: {
-                    [Op.or]: [req.authorizedUser.id, req.params.userId]
+                    [Op.or]: [req.authorizedUser.id, req.user.id]
                 },
                 to: {
-                    [Op.or]: [req.authorizedUser.id, req.params.userId]
+                    [Op.or]: [req.authorizedUser.id, req.user.id]
                 }
             }
         },
