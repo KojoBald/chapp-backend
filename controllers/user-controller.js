@@ -39,7 +39,10 @@ function createNewUser(req, res) {
         })
     }).catch(error => {
         console.error(error)
-        res.status(500).send(error.message)
+        res.status(500).json({
+            error: error.message, 
+            feedback: error.errors[0].message || 'there was an issue creating user'
+        })
     });
 }
 
