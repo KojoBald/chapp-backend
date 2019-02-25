@@ -80,7 +80,7 @@ function updateDirectMessage(req, res) {
         where: { id: req.message.id },
         fields: ['message']
     }).then(() => {
-        req.message.message = req.body.message;
+        req.message.text = req.body.message;
         res.status(200).json({
             message: req.message,
             feedback: 'message updated'

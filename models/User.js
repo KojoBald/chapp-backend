@@ -11,7 +11,8 @@ module.exports = function(sequelize, DataType){
         },
         email: {
             type: DataType.STRING,
-            allowNull: false
+            allowNull: false,
+            unique: true
         },
         image: {
             type: DataType.STRING,

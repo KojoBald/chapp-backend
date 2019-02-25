@@ -26,3 +26,33 @@ function _parseDatabaseUri() {
         name: match[5]
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+// const Sequelize = require('sequelize');
+
+// const sequelize = new Sequelize('postgresql://postgres:otis2016@localhost/Chapp', 
+// {
+//     dialect: 'postgres'  
+// })
+ 
+// sequelize.authenticate().then(
+//     function()
+//     {
+//         console.log('connected to postgres db')
+//     },
+//     function(err)
+//     {
+//         console.log(err)
+//     }
+// )
+
+// module.exports = sequelize;

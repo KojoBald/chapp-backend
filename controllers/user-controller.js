@@ -11,17 +11,16 @@ const UserModel = require('../db').import('../models/User')
 UserController.post('/', createNewUser)
 UserController.get('/search', searchForUser)
 
-UserController.put('/login', loginUser );
+UserController.post('/login', loginUser );
 
-UserController.use('/:id', _withUserFromId);
 UserController.route('/:id')
-    .put(validateSession, _isSelf, updateUser)
-    .delete(validateSession, _isSelf, deleteUser)
-    .get(getUser)
+    .put(validateSession, _withUserFromId, _isSelf, updateUser)
+    .delete(validateSession, _withUserFromId, _isSelf, deleteUser)
+    .get(_withUserFromId, getUser)
 
-UserController.get('/:id/channels', getUserChannels)
+UserController.get('/:id/channels', _withUserFromId, getUserChannels)
 
-UserController.use('/:id/message', require('./user-message-controller'))
+UserController.use('/:id/message', _withUserFromId, require('./user-message-controller'))
 
 function createNewUser(req, res) {
     UserModel.create({
@@ -159,7 +158,7 @@ function _withUserFromId(req, res, next) {
         console.error(error)
         res.status(500).json({ 
             error: error.message,
-            feedback: 'there was an issue getting user channels'
+            feedback: `there was an issue getting user ${req.params.id}`
         });
     })
 }
