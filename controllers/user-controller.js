@@ -9,7 +9,7 @@ const UserController = express.Router();
 const UserModel = require('../db').import('../models/User')
 
 UserController.post('/', createNewUser)
-UserController.get('/search', searchForUser)
+UserController.get('/', searchForUser)
 
 UserController.post('/login', loginUser );
 
@@ -55,7 +55,7 @@ function searchForUser(req, res) {
                 last: { [Op.iLike]: `%${req.query.q}%` }
             }
         },
-        attributes: ['id', 'username']
+        attributes: ['id', 'username', 'first', 'last']
     }).then(users => {
         res.status(200).json(users);
     })
