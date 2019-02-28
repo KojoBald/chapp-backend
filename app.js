@@ -8,8 +8,7 @@ var db = require('./db');
 db.sync();
 
 app.use(cors({
-    exposedHeaders: ['Authorization'],
-    credentials: true
+    exposedHeaders: ['Authorization']
 }));
 app.use(require('body-parser').json());
 
