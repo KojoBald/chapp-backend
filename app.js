@@ -7,11 +7,15 @@ var db = require('./db');
 
 db.sync();
 
-app.use(cors({
-    exposedHeaders: ['Authorization']
-}));
+// app.use(cors({
+//     exposedHeaders: ['Authorization']
+// }));
 app.use(require('body-parser').json());
 
+app.use('*', (req, res, next) => {
+    console.log('got response');
+    next();
+})
 app.use('/user', require('./controllers/user-controller'));
 app.use('/channel', require('./controllers/channel-controller'));
 
