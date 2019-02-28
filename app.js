@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 
 var express = require('express');
 const cors = require('cors');
@@ -12,8 +12,8 @@ db.sync();
 // }));
 app.use(require('body-parser').json());
 
-app.use('*', (req, res, next) => {
-    console.log('got response');
+app.use((req, res, next) => {
+    console.log('got request');
     next();
 })
 app.use('/user', require('./controllers/user-controller'));
