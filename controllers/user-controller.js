@@ -1,27 +1,29 @@
 const express = require('express');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
-const Op = require('sequelize').Op;
+const sequelize = require('sequelize')
+const Op = sequelize.Op;
 
+const db = require('../db');
 const validateSession = require('../middleware/validateSession');
 
 const UserController = express.Router();
-const UserModel = require('../db').import('../models/User')
+const UserModel = db.import('../models/User');
+const ChannelModel = db.import('../models/Channel');
 
 UserController.post('/', createNewUser)
 UserController.get('/', searchForUser)
 
 UserController.put('/login', loginUser );
 
-UserController.use('/:id', _withUserFromId);
 UserController.route('/:id')
-    .put(validateSession, _isSelf, updateUser)
-    .delete(validateSession, _isSelf, deleteUser)
-    .get(getUser)
+    .put(validateSession, _withUserFromId, _isSelf, updateUser)
+    .delete(validateSession, _withUserFromId, _isSelf, deleteUser)
+    .get(_withUserFromId, getUser)
 
-UserController.get('/:id/channels', getUserChannels)
+UserController.get('/:id/channels', _withUserFromId, getUserChannels)
 
-UserController.use('/:id/message', require('./user-message-controller'))
+UserController.use('/:id/message', _withUserFromId, require('./user-message-controller'))
 
 function createNewUser(req, res) {
     UserModel.create({
@@ -104,7 +106,8 @@ function getUser(req, res) {
         last: req.user.last,
         email: req.user.email,
         image: req.user.image,
-        channels: req.user.channels
+        channels: req.user.channels,
+        id: req.user.id
     });
 }
 
@@ -137,7 +140,18 @@ function loginUser(req, res) {
 }
 
 function getUserChannels(req, res) {
-    res.status(200).json(req.user.channels);
+    ChannelModel.findAll({
+        where: { id: req.user.channels },
+        attributes: ['id', 'name']
+    }).then(channels => {
+        res.status(200).json(channels)
+    }).catch(error => {
+        console.error(error);
+        res.status(500).send({
+            error: error.message,
+            feedback: 'There was an error getting your channels'
+        })
+    })
 }
 
 function _createSessionTokenForUser(userId) {
@@ -145,6 +159,8 @@ function _createSessionTokenForUser(userId) {
 }
 
 function _withUserFromId(req, res, next) {
+    if(req.params.id === 'me') return next();
+
     UserModel.findOne({
         where: { id: req.params.id }
     }).then(user => {

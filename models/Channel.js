@@ -6,7 +6,16 @@ module.exports = function(sequelize, DataType){
         },
         users: {
             type: DataType.ARRAY(DataType.INTEGER),
-            allowNull: false
+            allowNull: false,
+            defaultValue: []
+        }
+    }, {
+        hooks: {
+            beforeUpdate(channel) {
+                if(!channel.users.includes(channel.admin)) {
+                    channel.users.unshift(channel.admin);
+                }
+            }
         }
     })
 

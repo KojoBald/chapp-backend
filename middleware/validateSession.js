@@ -4,6 +4,7 @@ var User = db.import('../models/User');
 
 module.exports = (req, res, next) => {
     var sessionToken = req.headers.authorization;
+    console.log('validating session', req.headers)
     if(!sessionToken) {
         return res.status(403).send({ auth: false, message: 'No token provided.' });
     } else {

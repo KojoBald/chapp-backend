@@ -75,12 +75,12 @@ function getDirectMessagePartners(req, res) {
 
 function updateDirectMessage(req, res) {
     DirectMessageModel.update({
-        message: req.body.message
+        text: req.body.text
     }, {
         where: { id: req.message.id },
-        fields: ['message']
+        fields: ['text']
     }).then(() => {
-        req.message.message = req.body.message;
+        req.message.text = req.body.text;
         res.status(200).json({
             message: req.message,
             feedback: 'message updated'
@@ -109,7 +109,6 @@ function deleteDirectMessage(req, res) {
 }
 
 function getAllDirectMessages(req, res) {
-    console.log('getting messages between', req.authorizedUser.id, req.user.id);
     DirectMessageModel.findAll({
         where: { 
             [Op.and]: {

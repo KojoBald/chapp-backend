@@ -1,5 +1,9 @@
 const ChannelController = require('express').Router()
-const ChannelModel = require('../db').import('../models/Channel')
+const db = require('../db')
+const sequelize = require('sequelize')
+const Op = sequelize.Op;
+const ChannelModel = db.import('../models/Channel')
+const UserModel = db.import('../models/User')
 const validateSession = require('../middleware/validateSession')
 
 ChannelController.post('/', validateSession, createChannel)
@@ -10,19 +14,32 @@ ChannelController.delete('/:id', validateSession, _withChannelFromId, _isChannel
 
 ChannelController.get('/:id/users', _withChannelFromId, getChannelUsers)
 
-ChannelController.put('/:id/invite', validateSession, _withChannelFromId, _isChannelAdmin, inviteUserToChannel)
+ChannelController.put('/:id/invite', validateSession, _withChannelFromId, _isChannelAdmin, inviteUsersToChannel)
 
-ChannelController.use('/message', require('./channel-message-controller'));
+ChannelController.use('/:id/message', _withChannelFromId, require('./channel-message-controller'));
 
 function createChannel(req, res) {
     const channelFromRequest = {
         name: req.body.name,
         users: [ req.authorizedUser.id ],
-        admin_id: req.authorizedUser.id,
+        admin: req.authorizedUser.id,
     }
 
     ChannelModel.create(channelFromRequest)
-        .then(channel => res.status(200).json(channel))
+        .then(channel => {
+            UserModel.update({
+                channels: sequelize.fn('array_append', sequelize.col('channels'), channel.id)
+            }, {
+                where: { id: channel.admin }
+            })
+            return _addUsersToChannel(channel, req.body.users)
+        })
+        .then(channel => {
+            res.status(200).json({
+                channel,
+                feedback: 'channel created'
+            })
+        })
         .catch(err => {
             console.error(err);
             res.status(500).json({
@@ -44,6 +61,8 @@ function updateChannel(req, res) {
     }, { 
         where: { id: req.params.id },
         fields: ['name']
+    }).then(channel => {
+        return _addUsersToChannel(req.channel, req.body.users)    
     }).then(channel => {
         res.status(200).json({
             channel: req.channel,
@@ -76,26 +95,67 @@ function getChannelUsers(req, res) {
     res.status(200).json(req.channel.users);
 }
 
-function inviteUserToChannel(req, res) { //TODO: add channel to user's channels array
-    req.channel.users.push(req.body.user)
-    ChannelModel.update({
-        users: req.channel.users
-    }, { 
-        where: { id: req.params.id },
-        fields: ['users']
-    }).then(channel => {
-        res.status(200).json({
-            channel: req.channel,
-            feedback: 'channel updated'
+function inviteUsersToChannel(req, res) { 
+    // req.body.users = req.body.users.filter(user => !req.channel.users.includes(user))
+    // req.channel.users = req.channel.users.concat(req.body.users)
+    // ChannelModel.update({
+    //     users: req.channel.users
+    // }, { 
+    //     where: { id: req.params.id },
+    //     fields: ['users']
+    // }).then(channel => {
+    //     UserModel.update(
+    //         { channels: sequelize.fn('array_append', sequelize.col('channels'), req.channel.id) },
+    //         { where: { id: req.body.users } }
+    //     )
+    //     res.status(200).json({
+    //         channel: req.channel,
+    //         feedback: 'channel updated'
+    //     })
+    // }).catch(err => {
+    //     console.error(err)
+    //     res.status(500).json({ 
+    //         error: err.message,
+    //         feedback: 'there was an issue inviting the user to channel'
+    //     })
+    // })
+    _addUsersToChannel(req.channel, req.body.users)
+        .then(channel => {
+            res.status(200).json({
+                channel,
+                feedback: 'channel updated'
+            })
         })
-    }).catch(err => {
-        console.error(err)
-        res.status(500).json({ 
-            error: err.message,
-            feedback: 'there was an issue inviting the user to channel'
+        .catch(error => {
+            res.status(500).json({
+                error: error.message,
+                feedback: 'there was an issue inviting users to the channel'
+            })
+        })
+}
+
+function _addUsersToChannel(channel, users) {
+    users = users.filter(user => !channel.users.includes(user))
+    channel.users = channel.users.concat(users)
+
+    return new Promise((resolve, reject) => {
+        ChannelModel.update({
+            users: channel.users
+        }, { 
+            where: { id: channel.id },
+            fields: ['users']
+        }).then(channel => {
+            return UserModel.update(
+                { channels: sequelize.fn('array_append', sequelize.col('channels'), channel.id) },
+                { where: { id: users } }
+            )
+        }).then(updatedUser => {
+            resolve(channel, updatedUser)
+        }).catch(error => {
+            reject(error)
         })
     })
-    }
+}
 
 function _withChannelFromId(req, res, next) {
     ChannelModel.findOne({
@@ -115,7 +175,7 @@ function _withChannelFromId(req, res, next) {
 }
 
 function _isChannelAdmin(req, res, next) {
-    if(req.authorizedUser.id === req.channel.admin_id) {
+    if(req.authorizedUser.id === req.channel.admin) {
         next();
     } else {
         res.status(403).json({ error: 'You are not the admin of that channel' })

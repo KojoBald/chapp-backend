@@ -15,7 +15,8 @@ module.exports = function(sequelize, DataType){
         },
         image: {
             type: DataType.STRING,
-            allowNull: true
+            allowNull: true,
+            defaultValue: 'https://www.autourdelacom.fr/wp-content/uploads/2018/03/default-user-image.png'
         },
         first: {
             type: DataType.STRING,
@@ -27,7 +28,8 @@ module.exports = function(sequelize, DataType){
         },
         channels: {
             type: DataType.ARRAY(DataType.INTEGER),
-            allowNull: true
+            allowNull: true,
+            defaultValue: [ 1 ]
         }
     })
 

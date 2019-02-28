@@ -7,7 +7,7 @@ const sequelize = new Sequelize(db.name, db.user, db.password, {
     host: db.host,
     port: db.port,
     // dialectOptions: { ssl: true },
-    logging: false
+    // logging: false
 });
 
 sequelize.authenticate()
